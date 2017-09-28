@@ -5,7 +5,7 @@
 #define MAX_CODE_LENGTH 500
 #define MAX_LEXI_LEVELS 3
 
-typedef struct 
+typedef struct
 {
 	int op;
 	int r;
@@ -71,7 +71,7 @@ int execute(instruction exec)
 		// JPC, jump if R=0
 		case 8: if(REGISTERS[exec.r] == 0)
 					{
-						PC = exec.m;	
+						PC = exec.m;
 					}
 			break;
 		// SIO, print out REGISTERS, red in REGISTERS, set halt flag
@@ -80,7 +80,7 @@ int execute(instruction exec)
 				  else if(exec.m == 2)
 				  	scanf("%d", &REGISTERS[exec.r]);
 				  else if(exec.m == 3)
-				  	RUN = 0;	
+				  	RUN = 0;
 			break;
 		// NEG
 		case 10: REGISTERS[exec.r] = 0 - REGISTERS[exec.l];
@@ -127,7 +127,7 @@ int execute(instruction exec)
 void printInstruct(instruction instr, int codeLine)
 {
 	printf("%d\t%s %d\t%d\t%d\t%d\t%d\t%d\n", codeLine, INST_NAME[instr.op], instr.r, instr.l, instr.m, PC, BP, SP);
-	
+
 }
 
 void printCode()
@@ -144,26 +144,51 @@ void printCode()
 
 int main(int argc, char *argv[])
 {
-	
 
-	
+	/*FILE *ifp = NULL;
+	int *buffer = NULL
+	size_t len;
+	int count = 0;
+
+	ifp = fopen(argv[1],"r");
+
+	if (ifp == NULL)
+	{
+			fprintf(stderr, "File %s not found.\n", argv[1]);
+			exit(1);
+	}
+	else
+	{
+			//prints header first before pulling data out of txt file
+			printf("Factorial Program:\n");
+			while(!feof(ifp))
+			{
+					fscanf(ifp,"%d",&code[count].op);
+					fscanf(ifp, "%d", &code[count].r)
+					fscanf(ifp,"%d", &code[count].l)
+					fscanf(ifp, "%d", &code[count].m));
+					count++;
+			}
+	}*/
+
+
 	RUN = 1;
 	CODE[0].op = 1; CODE[0].r = 0; CODE[0].m = 123;
 	CODE[1].op = 9; CODE[1].r = 0; CODE[1].m = 1;
 	CODE[2].op = 9; CODE[2].r = 1; CODE[2].m = 2;
 	CODE[3].op = 9; CODE[3].r = 1; CODE[3].m = 1;
 	CODE[4].op = 9; CODE[4].r = 0; CODE[3].m = 3;
-	
+
 	printCode();
 	printf("Program Stack Trace\nInstructions\t\t\tPC\tBP\tSP\n");
 	while(RUN && PC < MAX_CODE_LENGTH)
-	{	
+	{
 		IR = CODE[PC];
 		PC++;
-		
+
 		printInstruct(IR, PC-1);
 		execute(IR);
-		
-	}	
-		
+
+	}
+
 }
