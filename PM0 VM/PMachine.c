@@ -20,7 +20,7 @@ typedef struct
 const char* INST_NAME[23] = {"LIT", "RTN", "LOD", "STO", "CAL", "INC", "JMP", "JPC", "SIO"
 									, "NEG", "ADD", "SUB", "MUL", "DIV", "ODD", "EQL", "NEQ", "LSS", "LEQ", "GTR", "GEQ"};
 
-int 			REGISTERS[8];
+int 			REGISTERS[8] = {0};
 int 			STACK[MAX_STACK_HEIGHT] = {0};
 int			DIVIDER[MAX_STACK_HEIGHT/4] = {0};
 instruction CODE[MAX_CODE_LENGTH];
@@ -162,12 +162,12 @@ void printStack()
 	int i;
 	int stackcount = 0;
 	for(i = 0; i <= SP; i++)
-	{	
+	{
 		printf("%d", STACK[i]);
 		if(DIVIDER[stackcount] == i)
 		{
 			printf(" | ");
-			stackcount++;	
+			stackcount++;
 		}
 	}
 }
@@ -214,6 +214,7 @@ int main(int argc, char *argv[])
 
 
 	RUN = 1;
+	IR.op = 0; IR.r = 0; IR.l = 0; IR.m = 0;
 
 	printCode();
 	printf("Stack Trace\nInstructions\tPC\tBP\tSP\tStack|Registers\n-------------------------------------------------\n");
@@ -222,12 +223,10 @@ int main(int argc, char *argv[])
 		IR = CODE[PC];
 		PC++;
 
-		
 		execute(IR);
 		printInstruct(IR, PC-1);
 		printStack();
 		printRegisters();
-
 	}
 	printf("%s Output:\n", argv[1]);
 	for(i = 0; i < OUTCOUNTER; i++)
