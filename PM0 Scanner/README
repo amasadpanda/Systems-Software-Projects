@@ -1,0 +1,22 @@
+Timothy Yu
+Caleb McDaniel
+COP3402 Project 2
+Scanner
+
+How to compile the Scanner:
+"gcc Scanner.c"
+  Note: Although the executable can be named anything, it is prefered for it to be named "scanner"
+
+How to run the Virtual Machine:
+"./a.out <program_file>"
+  Note: replace "a.out" with the name of the executable, preferably "scanner"
+  
+The program takes a single argument, the name of file in which the PL/0 code is stored.
+This file should be in the same directory as the compiled Scanner program.
+
+The program first reads in the file, then prints out any errors.
+If no errors are found, two files are generated.
+The first file, "output", contains the lexemes list that is generated.
+The second file, "lexemes", contains the lexemes tables that is used to generate the output.
+
+At the very end, the contents of the source program, the output, and the lexemes file will be printed out.
