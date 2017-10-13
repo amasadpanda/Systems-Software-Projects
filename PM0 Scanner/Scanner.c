@@ -7,17 +7,12 @@
 #define MAX_DIGIT 5
 #define MAX_TABLE_SIZE 100
 
-typedef enum
-{
-    nulsym = 1, identsym = 2, numbersym = 3, plussym = 4, minussym = 5,
-    multsym = 6,  slashsym = 7, oddsym = 8, eqsym = 9, neqsym = 10, lessym = 11, leqsym = 12, gtrsym = 13, geqsym = 14, lparentsym = 15, rparentsym = 16, commasym = 17, semicolonsym = 18, periodsym = 19, becomessym = 20, beginsym = 21, endsym = 22, ifsym = 23, thensym = 24, whilesym = 25, dosym = 26, callsym = 27, constsym = 28, varsym = 29, procsym = 30, writesym = 31, readsym = 32, elsesym = 33
-} token_type;
-
 const char* RESERVED[] = {"const", "var", "procedure", "call", "begin", "end",
 								"if", "then", "else", "while", "do", "read","write", "null", "odd"};
 const int IDs[] = {28, 29, 30, 27, 21, 22, 23, 24, 33, 25, 26, 32, 31, 1, 8};
 const char SPECIAL[] = {'+', '-', '*', '/', '(', ')', '=', ',' , '.', '<', '>', ';' , ':'};
 
+// just a switch statement to return the number of each symbol
 int getsym(char c)
 {
   switch(c)
@@ -41,6 +36,9 @@ int getsym(char c)
   }
 }
 
+// loops through the SPECIAL array to see if any character is SPECIAL
+// returns the index that the match is found, or -1 otherwise
+// in the case that a := (the only special character with character length 2), it is manually checked before this function
 int isspecial(char c)
 {
 	int i;
@@ -52,6 +50,8 @@ int isspecial(char c)
 	return 0;
 }
 
+// loops through RESERVED words to find if the word is RESERVED
+// return the index at which it is found, or -1 otherwise
 int isreserved(char* word)
 {
   int i;
@@ -96,7 +96,9 @@ int main(int argc, char *argv[])
   token = fgetc(ifp);
 	while(!feof(ifp))
 	{
+      // The current lexeme is stored as a buffer for us to read in character one at a time
       char buffer[MAX_CHAR];
+      // memset to set all things to null, so any words smaller than MAX_CHAR still terminates correctly
       memset( buffer, '\0', sizeof(char)*MAX_CHAR );
       int place = 1;
       buffer[0] = token;
@@ -117,10 +119,12 @@ int main(int argc, char *argv[])
           next = fgetc(ifp);
         }
         place = isreserved(buffer);
+
+        // Below is output things
         if(place >= 0)
         {
-          fprintf(ofp, "%d ", IDs[place]);
-          fprintf(lfp, "%-13s%d\n", buffer, IDs[place]);
+          fprintf(ofp, "%d ", IDs[place]);              // output
+          fprintf(lfp, "%-13s%d\n", buffer, IDs[place]);// lexemes
         }
         else
         {
@@ -170,14 +174,17 @@ int main(int argc, char *argv[])
         }
       }
 
-      else
+      else if(isgraph(token))
       {
         // This section is reserved for characters not understood by the
         // Scanner, or characters that do not belong to PL0
+        printf("[%c] is not a valid symbol.\n", token);
+        return 1;
       }
       token = next;
 	}
-
+  // Outputting to stdout is done at the very end, to ensure that
+  // no errors were present first
   fclose(ifp);
   fclose(ofp);
   fclose(lfp);
@@ -203,6 +210,8 @@ int main(int argc, char *argv[])
   {
     fputc(fgetc(ofp), stdout);
   }
+
+  printf("\n");
 
   fclose(ifp);
   fclose(ofp);
