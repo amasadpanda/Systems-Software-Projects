@@ -54,18 +54,20 @@ symbol_table[MAX_SYMBOL_TABLE_SIZE]  = {0};
 */
 
 //Global Variables
-int token, codeindex, num, kind, count = 0, lexemeIndex = 0;
+int token, codeindex, num, kind, count = 0, lexemeIndex = 0, char id[12];
 
 //functions
 void errors(int errorCases);
 void parser(FILE *ifp, symbol *table, instruction *code);
 void gen(int op, int l, int m, instruction *code);
+int nextToken(FILE *ifp);
 
 
-int main(int argc, char *argv[])
+void main(void)
 {
     FILE *ifp = fopen("output.txt","r");
     FILE *ofp = fopen("parseroutput.txt", "w");
+	
     int i, lexlev = 0, dataindex = 0, tableindex = 0;
 
     instruction code[CODE_SIZE];
@@ -82,7 +84,8 @@ int main(int argc, char *argv[])
 
 void parser(FILE *ifp, symbol *table, instruction *code)
 {
-
+   token = getToken(ifp);
+   
 
 
 }
@@ -180,6 +183,19 @@ void errors(int errorCases)
             break;
     }
     exit(1);
-
 }
 
+int getToken(FILE *ifp)
+{
+	token = lexList[lexemeIndex].tokenID;
+	if (token == 2)
+	{
+	   strcpy(id, lexList[lexemeIndex].name);
+	}
+	else if (token == 3)
+	{
+           num = lexList[lexemeIndex].numval;
+	}
+	lexemeIndex++;
+	return token; 
+}
