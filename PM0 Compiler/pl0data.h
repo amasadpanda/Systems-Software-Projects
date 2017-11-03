@@ -27,7 +27,7 @@ typedef struct {
 }tokenStruct;
 
 extern tokenStruct lexList[5000];
-extern int lexemeIndex;
+extern int LEXEMEINDEX;
 
  typedef struct {
      int op; //Opcode
