@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <pl0data.h.
+#include <pl0data.h>
 
 #define CODE_SIZE 1000
 #define MAX_CHAR 11
