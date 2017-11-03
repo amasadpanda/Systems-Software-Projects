@@ -3,25 +3,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <pl0data.h.
 
 #define CODE_SIZE 1000
 #define MAX_CHAR 11
 #define MAX_DIGIT 5
 #define MAX_LEX_LEVELS 3
 #define MAX_SYMBOL_TABLE_SIZE 1000
-
-typedef enum
-{
-   nulsym, identsym, numbersym, plussym, minussym, multsym, slashsym, oddsym, eqsym, neqsym, lessym, leqsym, gtrsym, geqsym, lparentsym, rparentsym, commasym, semicolonsym, periodsym, becomessym, beginsym, endsym, ifsym, thensym, whilesym, dosym, callsym, constsym, varsym, procsym, writesym, readsym, elsesym
-} token_type;
-
-//Contains all tokens
-typedef struct
-{
-    token_type tokenID;
-    int numval;
-    char name[12];
-}tokenStruct;
 
 //Data structure for the symbol
 typedef struct
@@ -32,14 +20,6 @@ typedef struct
   int level; // L level
   int addr; // M address
 }symbol;
-
-typedef struct
-{
-    int op; //Opcode
-    int r;  // register
-    int l;  //L
-    int m;  //M
-}instruction;
 
 instruction CODE_TABLE[CODE_SIZE];
 symbol symbol_table[MAX_SYMBOL_TABLE_SIZE];
