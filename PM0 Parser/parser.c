@@ -34,7 +34,7 @@ char ID[12];
 tokenStruct lexemeList;
 
 //functions
-void errors(int errorCases);
+void error(int errorCase);
 void parser(FILE *ifp, symbol *table, instruction *code);
 void gen(int op, int l, int m, instruction *code);
 int nextToken(FILE *ifp);
@@ -343,7 +343,7 @@ void main(int n, char** args)
 
 void error(int errorCase)
 {
-    switch (errorCases)
+    switch (errorCase)
     {
         case 1:
             printf("Error 1: Use = instead of :=.\n");
