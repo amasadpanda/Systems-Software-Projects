@@ -31,7 +31,10 @@ symbol symbol_table[MAX_SYMBOL_TABLE_SIZE];
 //Global Variables
 int TOKEN, NUM, KIND, CODEINDEX = 0, SYMBOLCOUNT = 0, LEXEMEINDEX = 0, DATAINDEX = 4;
 char ID[12];
+int sp, max_level, current_level, reg_ptr;
 tokenStruct lexemeList;
+
+tokenStruct current_token;
 
 //functions
 void error(int errorCase);
@@ -39,6 +42,7 @@ void parser(FILE *ifp, symbol *table, instruction *code);
 void gen(int op, int l, int m, instruction *code);
 int nextToken(FILE *ifp);
 int getToken(FILE *ifp);
+void add_to_symbol_table( int k, char name[], int val, int addr ); //Inserts a symbol to the symbol table.
 
 // Gets the list of lexeme from a file, stores the tokens and returns how many tokens are found.
 int lexemeList(File* lexemeFile)
@@ -255,17 +259,28 @@ void statement()
     statement();
     CODE_TABLE[f].m = CODEINDEX;
   }
+	
+  
 }
 
 void block()
 {
-  if(TOKEN == token_type.constsym)
+  int val;
+  int proc_place; 
+  int space = 4;  
+  sp = 3;	  
+  int proc_index; // index for procedures
+  int jump_proc; // jumps to the procedure code.
+  
+  gen(7, 0, 0, 0) //initialize jump 
+	  
+   if(TOKEN == token_type.constsym)
   {
     while(true)
     {
       getToken();
       if(TOKEN != token_type.identsym)
-        error();
+        error(4);
 
       int placeInTable = findVar();
       // cannot be found
@@ -274,17 +289,17 @@ void block()
 
       getToken();
       if(TOKEN != token_type.eqsym)
-        error();
+        error(3);
       getToken();
       if(TOKEN != token_type.numbersym)
-        error();
+        error(2);
       symbol_table[placeInTable] = NUM;
       getToken();
       if(TOKEN != token_type.commasym)
         break;
     }
     if(TOKEN != token_type.semicolonsym)
-      error();
+      error(5);
     getToken();
   }
   if(TOKEN == token_type.varsym)
@@ -293,17 +308,35 @@ void block()
     {
       getToken();
       if(TOKEN != token_type.identsym)
-        error();
+        error(4);
       generateVar();
       getToken();
       if(TOKEN != token_type.commasym)
         break;
     }
     if(TOKEN != token_type.semicolonsym)
-      error();
+      error(5);
     getToken();
   }
   statement();
+
+    //procedure section
+    while(TOKEN != token_type.procsym)
+    {
+
+    getToken();
+
+    //identifier must go after procedure
+    if((TOKEN == token_type.identsym) != 0 ) 
+    error(4);
+    strcpy(name, token_type.numval);
+
+    //Create symbol table entry
+    add_to_symbol_table( 3, name, 0, 0 );
+    proc_index = SYMBOLCOUNT - 1; //Procedure index.
+    symbol_table[proc_index].level = level;
+    symbol_table[proc_index].addr = jump_proc + 1;
+    getToken();
 }
 
 void program()
@@ -430,4 +463,15 @@ void error(int errorCase)
             break;
     }
     exit(1);
+}
+void add_to_symbol_table( int k, char name[], int val, int addr ){
+
+  //add to symbol table.
+  symbol_table[SYMBOLCOUNT].kind = k;
+  strcpy(symbol_table[SYMBOLCOUNT].name, name );
+  symbol_table[SYMBOLCOUNT].val = val;
+  symbol_table[SYMBOLCOUNT].addr = addr;
+
+  SYMBOLCOUNT++;
+
 }
