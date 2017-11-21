@@ -212,55 +212,259 @@ void condition()
 
 void statement()
 {
-  if(TOKEN == token_type.identsym)
+
+  int i; //index.
+
+  //Boolean to check if identifier is declared. If so, = 1; else, = 0.
+  int declared = 0;
+
+  //Save symbol table index for found identifier.
+  int ident_index;
+
+    //ident
+  if(TOKEN != token_type.identsym)
   {
-    int place = findVar();
+
+    //Check if it's in the symbol table.
+    for(i = SYMBOLCOUNT - 1; i >= 0; i--)
+        if(!strcmp(current_token.value, symbol_table[i].name ))
+        {
+
+            if(symbol_table[i].kind == 1 ) error(12);
+
+            else if(symbol_table[i].kind == 2  )
+            {
+                declared = 1;
+                ident_index = i;
+            }
+
+        }
+
+    //Undeclared identifier.
+    if(!declared ) error(11);
+
     getToken();
-    if(TOKEN != token_type.becomessym)
-      error();
+
+    if(strcmp(current_token.type, "20") != 0) error(3);
+
     getToken();
+
     expression();
-    generateCode(4, 1, 0, symbol_table[place].addr);
+
+    //store at necessary mem address
+    gen(4, reg_ptr - 1, current_level - symbol_table[ ident_index ].level, symbol_table[ ident_index ].addr - 1  );
+
+
+    reg_ptr--;
+
   }
-  else if(TOKEN == token_type.beginsym)
-  {
-    getToken();
-    statement();
-    while(TOKEN == token_type.semicolonsym)
+
+  //"call" ident
+    else if(!strcmp(current_token.type, "27"))
     {
-      getToken();
-      statement();
+
+        int declared = 0;
+
+        getToken();
+
+        //identifier expected.
+        if(strcmp(current_token.type, "2")) error(14);
+
+        //Check if identifier has been declared.
+        for( i = SYMBOLCOUNT - 1; i >= 0; i-- )
+            if(!strcmp( current_token.value, symbol_table[i].name))
+            { //Found!
+                ident_index = i; //Save identifier index.
+                declared = 1;
+            }
+
+        if(!declared) 
+        { 
+            error(11);
+        }
+
+        if(symbol_table[ident_index].kind == 3)
+        {
+            gen(5, 0, level, symbol_table[ident_index].addr);
+            current_level++;
+        }
+        else
+            error(14); //Call must be followed by a procedure identifier.
+
+        getToken();
+
     }
-    if(TOKEN != token_type.endsym)
-      error();
-    getToken();
-  }
-  else if(TOKEN == token_type.ifsym)
+
+
+   //begin
+  else if(strcmp(current_token.type, "21") )
   {
+
     getToken();
-    condition();
-    int f = CODEINDEX;
-    generateCode(8, 0, 0, CODEINDEX);
-    if(TOKEN != token_type.thensym)
-      error();
-    getToken();
+
     statement();
-    CODE_TABLE[f].m = CODEINDEX;
+
+    while(!strcmp(current_token.type, "18") )
+    {
+
+      getToken();
+
+      statement();
+
+    }
+
+      getToken();
+
   }
-  else if(TOKEN == token_type.whilesym)
+
+  // if (cond) -> stmt
+  else if( !strcmp(current_token.type, "23") )
   {
+
     getToken();
+
     condition();
-    int f = CODEINDEX;
-    generateCode(8, 0, 0, CODEINDEX);
-    if(TOKEN != token_type.dosym)
-      error();
+
+    if( strcmp(current_token.type, "24" ) != 0 ) error(16);
+
     getToken();
+
+    //start code gen.
+
+    int ctemp = CODEINDEX; //Save current code index.
+
+
+     gen(8, reg_ptr - 1, 0, 0 );
+
+
     statement();
-    CODE_TABLE[f].m = CODEINDEX;
+
+    getToken();
+
+    //else
+    if(!strcmp(current_token.type, "33")){
+        //current cx
+        int ctemp2 = CODEINDEX;
+
+        gen(7, 0, 0, 0);
+
+        CODE_TABLE[ctemp].m = CODEINDEX;
+        getToken();
+
+        statement();
+
+        CODE_TABLE[ctemp2].m = CODEINDEX;
+        reg_ptr--;
+
+    }
+
+    else{
+        CODE_TABLE[ ctemp ].m = cx;
+
+        reg_ptr--;
+    }
   }
-	
-  
+
+  // while(cond) do (stmt)
+  else if( !strcmp(current_token.type, "25") ){
+
+    int cx1 = CODEINDEX;
+
+    get_next_token();
+
+    condition();
+
+    int cx2 = CODEINDEX;
+
+    gen( 8 , reg_ptr - 1, 0, 0 );
+
+    if( strcmp(current_token.type, "26" ) != 0 ) error(18);
+
+    getToken();
+
+    statement();
+
+    gen( 7 , 0, 0, cx1 );
+
+    CODE_TABLE[ cx2 ].m = CODEINDEX;
+
+    reg_ptr--;
+
+  }
+
+  //read ident
+  else if( !strcmp( current_token.type, "32" ) ){
+
+    getToken();
+
+    if( strcmp( current_token.type, "2") != 0 ) error(29);
+
+    //Check if identifier is in symbol table.
+    for( i = SYMBOLCOUNT - 1; i >= 0; i-- )
+        if( !strcmp( current_token.value, symbol_table[i].name ) ){
+
+            declared = 1;
+            ident_index = i;
+
+        }
+
+    //Undeclared ident.
+    if( !declared ) error(11);
+
+    //take user input for register.
+     gen( 10 , reg_ptr, 0, 2);
+
+     //Read into var.
+     if( symbol_table[ ident_index ].kind == 2)
+        gen( 4, reg_ptr, current_level - symbol_table[ ident_index ].level, symbol_table[ ident_index ].addr - 1 ); //Register to memory.
+
+     //error if read into const
+     else if( symbol_table[ ident_index ].kind == 1 )
+        error( 12 );
+
+     getToken();
+
+  }
+
+  // write ident
+  else if( !strcmp( current_token.type, "31") ){
+
+    getToken();
+
+    if( strcmp( current_token.type, "2") != 0 ) error(29);
+
+    //Check if ident is in symbol table.
+    for( i = SYMBOLCOUNT - 1; i >= 0; i-- )
+        if( !strcmp( current_token.value, symbol_table[i].name ) ){
+
+            if( symbol_table[i].kind == 1 || symbol_table[i].kind == 2  ){
+                declared = 1;
+                ident_index = i;
+            }
+
+        }
+
+    //Undeclared ident.
+    if( !declared ) error(11);
+
+
+
+     //Get var from main mem.
+     if( symbol_table[ ident_index ].kind == 2){
+        gen( 3 , reg_ptr, current_level - symbol_table[ ident_index ].level, symbol_table[ ident_index ].addr - 1 ); //Memory to register.
+        gen( 9 , reg_ptr, 0, 1 ); //Register to screen.
+     }
+
+     //Get const from symbol table.
+     else if( symbol_table[ ident_index ].kind == 1){
+        gen( 1 , reg_ptr, 0, symbol_table[ ident_index ].val );
+        gen( 9 , reg_ptr, 0, 1 );
+     }
+
+     getToken();
+
+  }
+
 }
 
 void block()
